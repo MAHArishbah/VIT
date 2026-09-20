@@ -72,7 +72,7 @@ Each iteration changes one *group* of settings, so iteration 1 → iteration 2 i
 
 | Run | Best val top-1 | Mean of last 3 epochs | Best val top-5 | Plateau* |
 |---|---|---|---|---|
-| Baseline (20 epochs) | `<BASELINE_BEST_VAL_TOP1>` | — | — | — |
+| Baseline (20 epochs) | 58.37692 | — | — | — |
 | Iteration 1 | 66.53% (epoch 49) | 66.49% | 87.88% (epoch 43) | epoch 36 |
 | Iteration 2 | **70.45%** (epoch 48) | 70.44% | **90.31%** (epoch 50) | epoch 42 |
 
@@ -107,6 +107,9 @@ Both models score lower on test than on validation (iteration 1: −5.7 pts, ite
 - Single seed per configuration (compute budget); differences under ~2 points are treated as inconclusive.
 - Standard errors from √(p(1−p)/n): ≈ 0.4 pts on validation (13,000 images), ≈ 0.67 pts on test (5,000 images). Standard errors of differences combine the individual ones and are conservative, since all models were evaluated on the same images.
 - No hyperparameter search: optimizer settings follow the DeiT recipe (peak learning rate 5e-4, not rescaled for batch size 128).
+- Iteration 1 (A100): the first ~10 epochs ran with 2 data-loading workers at ≈ 7.3 min/epoch; after switching to 8 workers (resume at epoch 11) ≈ 2.2 min/epoch — a ~3.4× speedup from the input pipeline alone. Total 2 h 49 min.
+- Iteration 2 (L4, 8 workers throughout, plus RandAugment's extra CPU work): ≈ 2.7 min/epoch, total 2 h 15 min. The shorter total comes from the A100 run's slow 2-worker start; per epoch, the A100 with 8 workers was ~20% faster.
+- Throughput: ≈ 1.3 TFLOPS with 2 workers vs ≈ 4.4 TFLOPS with 8 workers on the A100 — still only ~3% of its TF32 peak.
 
 ---
 
@@ -136,6 +139,7 @@ Both models score lower on test than on validation (iteration 1: −5.7 pts, ite
 2. Add a Colab secret named `WANDB_API_KEY`.
 3. Set `run_name` and `run_id` in the hyperparameter cell (a new pair per run), then **Runtime → Run all** and authorize Google Drive.
 4. After a disconnect, rerun all cells unchanged: training resumes from the last completed epoch and the same W&B run continues.
+5. **Find the bottleneck before paying for a bigger GPU.** With 2 data-loading workers the A100 spent most of its time waiting for data (≈ 7.3 min/epoch); 8 workers made it ≈ 3.4× faster with no change to the model or GPU.
 
 All hyperparameters live in one cell; the seed (42) fixes initialization, data order and augmentation randomness.
 
