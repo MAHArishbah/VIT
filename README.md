@@ -130,6 +130,7 @@ Both models score lower on test than on validation (iteration 1: −5.7 pts, ite
 3. **A validation split carved from the training pool is optimistic.** It overstated accuracy by ~5 points versus separately collected test images, while preserving the ranking between runs.
 4. **Cheap engineering changes matter.** TF32 and fused attention sped training up substantially with no change to the recipe; `drop_last` removed tiny 8-image final batches that caused loss/accuracy spikes.
 5. **Resumability is part of the experiment.** Saving the optimizer, scheduler and counters (not just weights) made Colab disconnects cost at most one epoch.
+6. **Find the bottleneck before paying for a bigger GPU.** With 2 data-loading workers the A100 spent most of its time waiting for data (≈ 7.3 min/epoch); 8 workers made it ≈ 3.4× faster with no change to the model or GPU.
 
 ---
 
@@ -139,7 +140,7 @@ Both models score lower on test than on validation (iteration 1: −5.7 pts, ite
 2. Add a Colab secret named `WANDB_API_KEY`.
 3. Set `run_name` and `run_id` in the hyperparameter cell (a new pair per run), then **Runtime → Run all** and authorize Google Drive.
 4. After a disconnect, rerun all cells unchanged: training resumes from the last completed epoch and the same W&B run continues.
-5. **Find the bottleneck before paying for a bigger GPU.** With 2 data-loading workers the A100 spent most of its time waiting for data (≈ 7.3 min/epoch); 8 workers made it ≈ 3.4× faster with no change to the model or GPU.
+
 
 All hyperparameters live in one cell; the seed (42) fixes initialization, data order and augmentation randomness.
 
