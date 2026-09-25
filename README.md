@@ -9,6 +9,8 @@ Regularization improved test top-1 by **+5.0 points** and cut the train–test g
 - Experiment tracking: [W&B project](https://wandb.ai/maharishabh7552-dsv-global-transport-and-logistics/ViT-imagenet100/overview)
 
 ---
+<img width="1612" height="765" alt="image" src="https://github.com/user-attachments/assets/9798e54b-589e-452f-8cf2-ba9da205bf75" />
+
 
 ## Highlights
 
